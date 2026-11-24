@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Тест – Работа с опасни химични агенти</title>
+<style>
+  :root {
+    --graphite: #2E3238; --orange: #E8711C; --orange-soft: #FBE3CF;
+    --bg: #F2F3F5; --text: #1F2328; --muted: #6B7280; --green: #2E7D32; --red: #C8102E;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Calibri, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 17px; line-height: 1.45; }
+  header { background: var(--graphite); color: #fff; padding: 18px 20px 16px; }
+  header h1 { margin: 0; font-size: 21px; line-height: 1.25; }
+  header p { margin: 4px 0 0; color: #F2A365; font-size: 15px; }
+  main { max-width: 680px; margin: 0 auto; padding: 18px 16px 40px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .hidden { display: none !important; }
+  label.field { display: block; margin: 14px 0 4px; font-weight: 700; color: var(--graphite); }
+  input[type=text] { width: 100%; padding: 12px; font-size: 17px; border: 1px solid #C9CED6; border-radius: 8px; font-family: inherit; }
+  input[type=text]:focus { outline: 2px solid var(--orange); border-color: var(--orange); }
+  .info { background: var(--orange-soft); border-radius: 8px; padding: 12px 14px; margin-top: 16px; font-size: 15px; }
+  button.main { display: block; width: 100%; margin-top: 20px; padding: 14px; font-size: 18px; font-weight: 700; border: 0; border-radius: 10px; background: var(--orange); color: #fff; cursor: pointer; font-family: inherit; }
+  button.main:disabled { background: #C9CED6; cursor: not-allowed; }
+  .progress { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+  .bar { height: 8px; background: #DDE1E6; border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+  .bar > div { height: 100%; background: var(--orange); width: 0; transition: width .3s; }
+  .qnum { color: var(--orange); font-weight: 700; font-size: 15px; }
+  .qtext { font-size: 19px; font-weight: 700; color: var(--graphite); margin: 6px 0 16px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; padding: 13px 14px; margin-bottom: 10px; border: 2px solid #DDE1E6; border-radius: 10px; background: #fff; font-size: 17px; font-family: inherit; color: var(--text); cursor: pointer; }
+  .opt:hover { border-color: #F2A365; }
+  .opt.sel { border-color: var(--orange); background: var(--orange-soft); }
+  .opt .l { flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--graphite); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .opt.sel .l { background: var(--orange); }
+  .result-score { font-size: 46px; font-weight: 700; text-align: center; margin: 6px 0 0; }
+  .verdict { text-align: center; font-size: 22px; font-weight: 700; margin: 4px 0 16px; }
+  .pass { color: var(--green); } .fail { color: var(--red); }
+  table.res { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.res td { padding: 7px 4px; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
+  table.res td:first-child { color: var(--muted); width: 42%; }
+  .note { font-size: 14px; color: var(--muted); margin-top: 14px; }
+  footer { text-align: center; font-size: 13px; color: var(--muted); padding: 0 16px 24px; }
+  @media print {
+    header { background: #fff; color: #000; border-bottom: 2px solid #000; }
+    header p { color: #000; }
+    body { background: #fff; }
+    .card { box-shadow: none; }
+    button { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Тест за проверка на знанията<br>Работа с опасни химични агенти</h1>
+  <p>Сенсата Технолоджис България ЕООД – локация Ботевград</p>
+</header>
+
+<main>
+  <!-- START -->
+  <section id="start" class="card">
+    <label class="field" for="fName">Име, презиме, фамилия</label>
+    <input type="text" id="fName" autocomplete="name">
+    <label class="field" for="fPos">Длъжност</label>
+    <input type="text" id="fPos">
+    <label class="field" for="fUnit">Звено / цех</label>
+    <input type="text" id="fUnit">
+    <div class="info">
+      Тестът съдържа <b>15 въпроса</b>. Всеки въпрос има четири отговора, от които само един е верен.
+      Въпросите се показват един след друг – след като потвърдите отговора, не можете да се върнете към предишния въпрос.
+      Тестът е успешно издържан при <b>най-малко 12 верни отговора (80 %)</b>.
+    </div>
+    <button class="main" id="btnStart" disabled>Започни теста</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="card hidden">
+    <div class="progress"><span id="pText"></span><span id="pName"></span></div>
+    <div class="bar"><div id="pBar"></div></div>
+    <div class="qnum" id="qNum"></div>
+    <div class="qtext" id="qText"></div>
+    <div id="opts"></div>
+    <button class="main" id="btnNext" disabled>Следващ въпрос</button>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="card hidden">
+    <div class="result-score" id="rScore"></div>
+    <div class="verdict" id="rVerdict"></div>
+    <table class="res">
+      <tr><td>Име, презиме, фамилия</td><td id="rName"></td></tr>
+      <tr><td>Длъжност</td><td id="rPos"></td></tr>
+      <tr><td>Звено / цех</td><td id="rUnit"></td></tr>
+      <tr><td>Дата и час</td><td id="rDate"></td></tr>
+      <tr><td>Дадени отговори</td><td id="rAns"></td></tr>
+    </table>
+    <p class="note">Покажете този екран на лектора или го запазете.</p>
+    <button class="main" id="btnPrint">Запази / Отпечатай резултата</button>
+  </section>
+</main>
+
+<footer>СТМ „Медико“ ЕООД</footer>
+
+<script>
+(function () {
+  var L = ['а', 'б', 'в', 'г'];
+  var Q = [
+    ['Кой нормативен акт определя пиктограмите, сигналните думи и предупрежденията за опасност (H) върху етикета?', ['Кодекс на труда', 'Регламент (ЕО) № 1272/2008 (CLP)', 'Наредба № 13 от 2003 г.', 'Закон за здравословни и безопасни условия на труд']],
+    ['Как изглежда пиктограмата за опасност по CLP?', ['Оранжев квадрат с черен символ', 'Син кръг с бял символ', 'Черен символ в бял ромб с червена рамка', 'Жълт триъгълник с черна рамка']],
+    ['Сигналната дума „Опасно“ на етикета означава:', ['По-тежка категория на опасност в сравнение с „Внимание“', 'Че продуктът е забранен за употреба', 'Че продуктът е опасен само за околната среда', 'Същото като „Внимание“']],
+    ['Кодовете от вида H3xx (например H317, H319) описват:', ['Физични опасности', 'Опасности за здравето', 'Опасности за околната среда', 'Препоръки за съхранение']],
+    ['Кое лично предпазно средство се използва при опасност от пръски по лицето (например при преливане на корозивни вещества)?', ['Антифони', 'Защитна каска', 'Предпазни обувки', 'Лицев шлем']],
+    ['Пиктограмата с газова бутилка (GHS04) означава:', ['Газ под налягане – съдът може да експлодира при нагряване', 'Токсичен газ', 'Запалим газ', 'Празна бутилка']],
+    ['Защо азотът, аргонът и хелият са опасни в затворено помещение?', ['Те са запалими', 'Те са корозивни', 'Изместват кислорода и нямат цвят и мирис – задушаването настъпва без предупреждение', 'Те предизвикват алергия']],
+    ['Как се разрежда концентрирана киселина или основа?', ['Водата се налива бързо в киселината', 'Киселината (основата) се добавя бавно във водата', 'Двете се смесват едновременно', 'Разреждането не е необходимо']],
+    ['Какво е характерно за сенсибилизаторите (лепила, смоли, някои пасти)?', ['Действат само при поглъщане', 'Алергията винаги се появява при първия контакт', 'Опасни са само за околната среда', 'Алергията може да се развие след повторен контакт и след това се отключва от минимални количества']],
+    ['Защитава ли филтрираща маска (FFP или филтър тип A) при недостиг на кислород?', ['Да, ако филтърът е нов', 'Не – необходим е изолиращ дихателен апарат', 'Да, при кратък престой', 'Да, ако маската е с клапан']],
+    ['С какво се гаси горящ метален прах, реагиращ с вода (напр. Magnesia 289)?', ['Сух пясък или прахов пожарогасител клас D', 'Водна струя', 'Пяна', 'Въглероден диоксид']],
+    ['При попадане на корозивно вещество в очите първата помощ е:', ['Изчакване, докато дразненето премине', 'Промиване с неутрализиращ разтвор', 'Промиване с чиста вода поне 15 минути при отворени клепачи', 'Превързване на окото']],
+    ['Колега е погълнал продукт с предупреждение H304 (керосин, масло). Какво правите?', ['Предизвиквате повръщане', 'Давате мляко', 'Давате голямо количество вода', 'Не предизвиквате повръщане, търсите незабавно медицинска помощ и носите ИЛБ']],
+    ['Къде е допустимо да се храните и пиете по време на работа?', ['В определените за целта помещения, след измиване на ръцете', 'На работното място, ако носите ръкавици', 'До линията, ако химичният продукт е затворен', 'Навсякъде по време на кратка почивка']],
+    ['Кой съд може да се използва за преливане на изопропанол на работното място?', ['Празна бутилка от минерална вода', 'Чаша за кафе', 'Предназначен съд, етикетиран с наименование и пиктограми', 'Всеки чист съд без етикет']]
+  ];
+  // ключът не е записан в явен вид
+  var K = 'MTEyMjMzMDIzMDIzMzMw';
+  var key = atob(K).split('').map(function (c, i) { return (parseInt(c, 10) + i) % 4; });
+  var PASS = 12;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var st = { name: '', pos: '', unit: '', i: 0, ans: [], sel: null, done: false };
+  var SKEY = 'oha_test_botevgrad';
+  function save() { try { sessionStorage.setItem(SKEY, JSON.stringify(st)); } catch (e) {} }
+  function load() { try { var s = sessionStorage.getItem(SKEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+
+  function checkStart() { $('btnStart').disabled = !($('fName').value.trim().length > 2); }
+  ['fName', 'fPos', 'fUnit'].forEach(function (id) { $(id).addEventListener('input', checkStart); });
+
+  $('btnStart').addEventListener('click', function () {
+    st.name = $('fName').value.trim(); st.pos = $('fPos').value.trim(); st.unit = $('fUnit').value.trim();
+    st.i = 0; st.ans = []; st.sel = null; st.done = false; save(); show('quiz'); renderQ();
+  });
+
+  function show(id) { ['start', 'quiz', 'result'].forEach(function (s) { $(s).classList.toggle('hidden', s !== id); }); window.scrollTo(0, 0); }
+
+  function renderQ() {
+    var q = Q[st.i];
+    $('pText').textContent = 'Въпрос ' + (st.i + 1) + ' от ' + Q.length;
+    $('pName').textContent = st.name;
+    $('pBar').style.width = (st.i / Q.length * 100) + '%';
+    $('qNum').textContent = 'Въпрос ' + (st.i + 1);
+    $('qText').textContent = q[0];
+    var box = $('opts'); box.innerHTML = '';
+    q[1].forEach(function (t, j) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'opt' + (st.sel === j ? ' sel' : '');
+      b.innerHTML = '<span class="l">' + L[j] + '</span><span></span>';
+      b.lastChild.textContent = t;
+      b.addEventListener('click', function () { st.sel = j; save(); renderQ(); });
+      box.appendChild(b);
+    });
+    $('btnNext').disabled = st.sel === null;
+    $('btnNext').textContent = st.i === Q.length - 1 ? 'Завърши теста' : 'Следващ въпрос';
+  }
+
+  $('btnNext').addEventListener('click', function () {
+    if (st.sel === null) return;
+    st.ans.push(st.sel); st.sel = null; st.i++;
+    if (st.i >= Q.length) { st.done = true; st.when = new Date().toISOString(); save(); renderResult(); }
+    else { save(); renderQ(); window.scrollTo(0, 0); }
+  });
+
+  function renderResult() {
+    var ok = st.ans.filter(function (a, i) { return a === key[i]; }).length;
+    var pass = ok >= PASS;
+    $('rScore').textContent = ok + ' / ' + Q.length;
+    $('rScore').className = 'result-score ' + (pass ? 'pass' : 'fail');
+    $('rVerdict').textContent = pass ? 'Издържал' : 'Неиздържал';
+    $('rVerdict').className = 'verdict ' + (pass ? 'pass' : 'fail');
+    $('rName').textContent = st.name; $('rPos').textContent = st.pos || '–'; $('rUnit').textContent = st.unit || '–';
+    var d = new Date(st.when || Date.now());
+    $('rDate').textContent = d.toLocaleDateString('bg-BG') + ' ' + d.toLocaleTimeString('bg-BG', { hour: '2-digit', minute: '2-digit' });
+    $('rAns').textContent = st.ans.map(function (a, i) { return (i + 1) + L[a]; }).join('  ');
+    show('result');
+  }
+
+  $('btnPrint').addEventListener('click', function () { window.print(); });
+
+  var prev = load();
+  if (prev && prev.name) {
+    st = prev;
+    if (st.done) renderResult(); else { show('quiz'); renderQ(); }
+  }
+})();
+</script>
+</body>
+</html>
