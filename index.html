@@ -40,6 +40,16 @@
   table.res { width: 100%; border-collapse: collapse; font-size: 15px; }
   table.res td { padding: 7px 4px; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
   table.res td:first-child { color: var(--muted); width: 42%; }
+  .rev-title { font-size: 19px; color: var(--graphite); margin: 22px 0 10px; }
+  .rv { border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid #E5E7EB; page-break-inside: avoid; }
+  .rv.ok { background: #EEF7EF; border-color: #CFE8D0; }
+  .rv.bad { background: #FDECEE; border-color: #F5C2C8; }
+  .rv .h { font-weight: 700; color: var(--graphite); margin-bottom: 6px; }
+  .rv .h .mk { font-size: 14px; margin-right: 6px; }
+  .rv .a { font-size: 15px; margin-top: 3px; }
+  .rv .a b { display: inline-block; min-width: 118px; }
+  .rv .yours { color: var(--red); }
+  .rv .right { color: var(--green); }
   .note { font-size: 14px; color: var(--muted); margin-top: 14px; }
   footer { text-align: center; font-size: 13px; color: var(--muted); padding: 0 16px 24px; }
   @media print {
@@ -60,12 +70,10 @@
 <main>
   <!-- START -->
   <section id="start" class="card">
-    <label class="field" for="fName">Име, презиме, фамилия</label>
+    <label class="field" for="fName">Име и фамилия</label>
     <input type="text" id="fName" autocomplete="name">
-    <label class="field" for="fPos">Длъжност</label>
-    <input type="text" id="fPos">
-    <label class="field" for="fUnit">Звено / цех</label>
-    <input type="text" id="fUnit">
+    <label class="field" for="fFirm">Фирма</label>
+    <input type="text" id="fFirm" autocomplete="organization">
     <div class="info">
       Тестът съдържа <b>15 въпроса</b>. Всеки въпрос има четири отговора, от които само един е верен.
       Въпросите се показват един след друг – след като потвърдите отговора, не можете да се върнете към предишния въпрос.
@@ -89,13 +97,13 @@
     <div class="result-score" id="rScore"></div>
     <div class="verdict" id="rVerdict"></div>
     <table class="res">
-      <tr><td>Име, презиме, фамилия</td><td id="rName"></td></tr>
-      <tr><td>Длъжност</td><td id="rPos"></td></tr>
-      <tr><td>Звено / цех</td><td id="rUnit"></td></tr>
+      <tr><td>Име и фамилия</td><td id="rName"></td></tr>
+      <tr><td>Фирма</td><td id="rFirm"></td></tr>
       <tr><td>Дата и час</td><td id="rDate"></td></tr>
-      <tr><td>Дадени отговори</td><td id="rAns"></td></tr>
     </table>
-    <p class="note">Покажете този екран на лектора или го запазете.</p>
+    <h2 class="rev-title">Преглед на отговорите</h2>
+    <div id="review"></div>
+    <p class="note">Покажете резултата на лектора или го запазете.</p>
     <button class="main" id="btnPrint">Запази / Отпечатай резултата</button>
   </section>
 </main>
@@ -128,16 +136,16 @@
   var PASS = 12;
 
   var $ = function (id) { return document.getElementById(id); };
-  var st = { name: '', pos: '', unit: '', i: 0, ans: [], sel: null, done: false };
-  var SKEY = 'oha_test_botevgrad';
+  var st = { name: '', firm: '', i: 0, ans: [], sel: null, done: false };
+  var SKEY = 'oha_test_botevgrad_v2';
   function save() { try { sessionStorage.setItem(SKEY, JSON.stringify(st)); } catch (e) {} }
   function load() { try { var s = sessionStorage.getItem(SKEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
 
-  function checkStart() { $('btnStart').disabled = !($('fName').value.trim().length > 2); }
-  ['fName', 'fPos', 'fUnit'].forEach(function (id) { $(id).addEventListener('input', checkStart); });
+  function checkStart() { $('btnStart').disabled = !($('fName').value.trim().length > 2 && $('fFirm').value.trim().length > 1); }
+  ['fName', 'fFirm'].forEach(function (id) { $(id).addEventListener('input', checkStart); });
 
   $('btnStart').addEventListener('click', function () {
-    st.name = $('fName').value.trim(); st.pos = $('fPos').value.trim(); st.unit = $('fUnit').value.trim();
+    st.name = $('fName').value.trim(); st.firm = $('fFirm').value.trim();
     st.i = 0; st.ans = []; st.sel = null; st.done = false; save(); show('quiz'); renderQ();
   });
 
@@ -177,10 +185,25 @@
     $('rScore').className = 'result-score ' + (pass ? 'pass' : 'fail');
     $('rVerdict').textContent = pass ? 'Издържал' : 'Неиздържал';
     $('rVerdict').className = 'verdict ' + (pass ? 'pass' : 'fail');
-    $('rName').textContent = st.name; $('rPos').textContent = st.pos || '–'; $('rUnit').textContent = st.unit || '–';
+    $('rName').textContent = st.name; $('rFirm').textContent = st.firm || '–';
     var d = new Date(st.when || Date.now());
     $('rDate').textContent = d.toLocaleDateString('bg-BG') + ' ' + d.toLocaleTimeString('bg-BG', { hour: '2-digit', minute: '2-digit' });
-    $('rAns').textContent = st.ans.map(function (a, i) { return (i + 1) + L[a]; }).join('  ');
+    var box = $('review'); box.innerHTML = '';
+    Q.forEach(function (q, i) {
+      var good = st.ans[i] === key[i];
+      var d = document.createElement('div'); d.className = 'rv ' + (good ? 'ok' : 'bad');
+      var h = document.createElement('div'); h.className = 'h';
+      var mk = document.createElement('span'); mk.className = 'mk ' + (good ? 'right' : 'yours'); mk.textContent = good ? '✔ Вярно' : '✘ Грешно';
+      h.appendChild(mk); h.appendChild(document.createTextNode((i + 1) + '. ' + q[0])); d.appendChild(h);
+      function line(lbl, j, cls) {
+        var a = document.createElement('div'); a.className = 'a ' + cls;
+        var b = document.createElement('b'); b.textContent = lbl; a.appendChild(b);
+        a.appendChild(document.createTextNode(L[j] + ') ' + q[1][j])); d.appendChild(a);
+      }
+      if (good) line('Вашият отговор:', st.ans[i], 'right');
+      else { line('Вашият отговор:', st.ans[i], 'yours'); line('Верен отговор:', key[i], 'right'); }
+      box.appendChild(d);
+    });
     show('result');
   }
 
